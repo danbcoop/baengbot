@@ -9,7 +9,7 @@ public class UI {
 	private final static boolean isWindows = System.getProperty("os.name").contains("Windows")? true : false;
   private boolean bbCreated = false;
 
-	public UserInterface() {}
+	public UI() {}
 
 	public static void clearConsole() {
 		try {
