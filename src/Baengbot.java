@@ -22,14 +22,20 @@ import org.apache.tika.sax.BodyContentHandler;
 
 public class Baengbot{
   Robot robot = new Robot();
-  String pdfContent = "";
+  String pdfContent;
+  String cfgBegin;
+  String cfgDelayPress;
+  String cfgDelayRelease;
   
   // Constructor
   public Baengbot() throws AWTException, IOException, TikaException {
-  return;
+    cfgBegin        = Config.begin();
+    cfgDelayPress   = Config.delayPress();
+    cfgDelayRelease = Config.delayRelease();
+    return;
   }
 
-  public void run(Strung pdfPath) {
+  public void run(String pdfPath) {
 
   }
 }
