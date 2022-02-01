@@ -1,56 +1,74 @@
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
+import java.util.regex.MatchResult;
 
 public final class Config {
 
-  private Config() {}
+  private static String begin = "LUNAR";
+  private static String delay_press = "5";
+  private static String delay_release = "3";
+	private static String path_in = Paths.get("").toAbsolutePath().getParent().getParent().toString();
+  private static String path_out = path_in; 
+  private static String soffice = "C:\\Program Files\\LibreOffice 5\\program"
+  private String patternOption = RegexHelper.option();
 
-  public static String readConfig(String option) {
-  String optionValue = "";
+  public Config() {
    	try {
-		  String path       = Paths.get("config.cfg").toString();
-		  File myObj        = new File(path);
-		  Scanner myReader  = new Scanner(myObj);
-		  myReader.useDelimiter(System.lineSeparator());
-		  while (myReader.hasNext()) {
-			  String line = myReader.next();
-        // if "option" is found
-			  if (line.indexOf(option)!=-1) {
-				  line = line.replaceAll("\\s",""); // get rid of white spaces
-          if (line.indexOf("#")<1) // if option is not commented out
-            optionValue = line.replaceFirst(".+=(.+)[#]*","$1");
-			  }
+		  File cfgFile        = new File(Paths.get("config.cfg").toString());
+		  Scanner cfgScanner  = new Scanner(cfgFile);
+      cfgScanner.useDelimiter(System.lineSeparator());
+      while (cfgScanner.hasNextLine()) {
+        if (cfgScanner.hasNext(RegexHelper.option())) {
+          cfgScanner.next(RegexHelper.option());
+          MatchResult res = cfgScanner.match();
+          String option = res.group(1);
+          switch (option) {
+            case "begin"
+              -> begin = res.group(2);
+            case "delay_press" 
+              -> delay_press = res.group(2);
+            case "delay_release"
+              -> delay_release = res.group(2);
+            case "path_in"
+              -> path_in = res.group(2);
+            case "path_out"
+              -> path_out = res.group(2);
+            case "path_soffice.exe"
+              -> soffice = res.group(2);
+          }
+        }
+        cfgScanner.nextLine();
 		  }
-		  myReader.close();
+		  cfgScanner.close();
 		} catch (Exception e) {
       System.out.println("Fehler beim Lesen der Config Datei: " + e);
     }
-    return optionValue;
-}
+ }
+
   public static String begin() {
-    String s = readConfig("begin"); 
-    return s.equals("")? "LUNAR" : s;
+    return begin;
   }
 
-  public static String delayPress() {
-    String s = readConfig("delay_press");
-    return s.equals("")? "5" : s;
+  public static int delayPress() {
+    return Integer.parseInt(delay_press);
   }
 
 
-  public static String delayRelease() {
-    String s = readConfig("delay_release");
-    return s.equals("")? "6" : s;
+  public static int delayRelease() {
+    return Integer.parseInt(delay_release);
   }
 
   public static String pathIn() {
-    String s = readConfig("path_in");
-    return s;
+    return path_in;
   }
 
   public static String pathOut() {
-    String s = readConfig("path_out");
-    return s;
+    return path_out;
+  }
+
+  public static String soffice() {
+    return soffice;
   }
 }
