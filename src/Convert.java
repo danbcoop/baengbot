@@ -1,5 +1,5 @@
-public class Xls {
-  public Xls() {
+public class Convert {
+  public Convert() {
 }
 
 	public static boolean convertToCsv(String fn) {
