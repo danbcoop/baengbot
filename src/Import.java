@@ -2,6 +2,7 @@
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.nio.file.Files;
 
 public class Import {
 
@@ -19,16 +20,16 @@ public class Import {
 		int ii=0;
 		System.out.println("Es wurden die folgenden möglichen Dateien in " +Config.pathIn()+" gefunden:");
 		for (String f:filenames) {
-			
+
 			if (f.indexOf(".xlsx")!=-1) {
-				
+
 				System.out.println((is[ii]) + ")\t\t" + f);
 				is[ii]=i;
 				ii++;
 			}
 			i++;
 		}
-		
+
 		System.out.println("\nWähle die Diamond-Datei:");
 		while (s==-1) {
 			System.out.println("Bitte eine Zahl eingeben. (0 für Abbruch)");
@@ -38,16 +39,16 @@ public class Import {
 			if (s==0) {
 				return false;
 			}
-			
-			}		
+
+		}		
 		pathDia = Paths.get(filenames[is[s-1]]).toString();
 		if (!Convert.convertToCsv(Paths.get(Config.pathIn(),pathDia).toString())) {
 			return false;
 		}
-		
+
 		pathDia = pathDia.substring(0, pathDia.indexOf(".x")) + ".csv";
 		s=-1;
-	
+
 		System.out.println("\nWähle die DC-Datei:");
 		while (s==-1) {
 			System.out.println("Bitte eine Zahl eingeben. (0 für Abbruch)");
@@ -73,7 +74,7 @@ public class Import {
 			if (s==0) {
 				return false;
 			}
-			
+
 		}		
 		pathMar = Paths.get(filenames[is[s-1]]).toString();
 		if (!Convert.convertToCsv(Paths.get(Config.pathIn(),pathMar).toString())) {
@@ -81,7 +82,7 @@ public class Import {
 		}
 		pathMar = pathMar.substring(0, pathMar.indexOf(".x")) + ".csv";
 		s=-1;
-		
+
 		return true;
 	}
 	public static void run() {
@@ -102,20 +103,20 @@ public class Import {
 				String month="";
 				myWriter.write("Code,Price,Title,Issue,Distributor"+System.lineSeparator());
 				while (myReader.hasNextLine()) {
-					line = myReader.nextLine().replaceAll(",",".");
+					line = myReader.nextLine();//.replaceAll(",",".");
 					String[] cols = line.split(";");
 					String regexname = "([^#]+)(?:(?:\\s#)|(?:\\sVOL\\s))(\\d+).*";
 					String code = cols[cn.code];
 					String price = cols[cn.price];
 					String name = cols[cn.title];
-					String issue = "";
+					//String issue = "";
 					if (name.indexOf(" #") != -1 || name.indexOf(" VOL ") != -1) {
-						issue = name.replaceFirst(regexname, "$2");
+						//issue = name.replaceFirst(regexname, "$2");
 						name = name.replaceFirst(regexname, "$1");
 					}
 					int indexCvr = cols[cn.title].indexOf("CVR ");
 					if (indexCvr != -1) name = name+" "+cols[cn.title].substring(indexCvr,indexCvr+5);
-					myWriter.write(code + "," + price + "," + name + "," + cols[cn.issue] + ",DIA" + System.lineSeparator());
+					myWriter.write("\"" + code + "\",\"" + price + "\",\"" + name + "\",\"" + cols[cn.issue] + "\",\"DIA\"" + System.lineSeparator());
 					i++;
 					month = code.substring(0, 5);
 
@@ -135,7 +136,7 @@ public class Import {
 				cn = new ColNum(line);
 				myWriterDC.write("Qty,MgCode,Code,Price,Title,Issue"+System.lineSeparator());
 				while (myReader.hasNextLine()) {
-					line = myReader.nextLine().replaceAll(",",".");
+					line = myReader.nextLine();//.replaceAll(",",".");
 					String[] cols = line.split(";");
 					String regexname = "([^#]+)(?:(?:\\s#)|(?:\\sVOL\\s))(\\d+).*";
 					String code = cols[cn.code];
@@ -150,10 +151,10 @@ public class Import {
 					if (indexCvr != -1) name = name+" "+ cols[cn.title].substring(indexCvr,indexCvr+5);
 
 					String repPattern = "(\\d+)(\\D\\D)(\\d+)";
-					code = code.replaceAll(repPattern, "$2$1$3");
+					String mgCode = code.replaceAll(repPattern, "$2$1$3");
 
-					myWriter.write(code + "," + price + "," + name + "," + issue + ",PEP" + System.lineSeparator());
-					myWriterDC.write("," + i+ "," + code + "," + price + "," + cols[cn.title] + "," + issue + System.lineSeparator());
+					myWriter.write("\"" + mgCode + "\",\"" + price + "\",\"" + name + "\",\"" + issue + "\",\"PEP\"" + System.lineSeparator());
+					myWriterDC.write(",\"" + month+i+ "\",\"" + code + "\",\"" + price + "\",\"" + cols[cn.title] + "\",\"" + issue + "\"" + System.lineSeparator());
 					i++;
 				}
 
@@ -173,16 +174,16 @@ public class Import {
 				cn = new ColNum(line);
 				myWriterMAR.write("Qty,MgCode,Code,Price,Title,Issue"+System.lineSeparator());
 				while (myReader.hasNextLine()) {
-					line = myReader.nextLine().replaceAll(",",".");
+					line = myReader.nextLine();//.replaceAll(",",".");
 					String[] cols = line.split(";");
 					if (cols.length<Math.max(cn.issue,cn.price)) continue;
 					String code = cols[cn.code];
 					String price = cols[cn.price];
-					String name = cols[cn.title];
+					String name = cols[cn.title].toUpperCase();
 					String issue = cols[cn.issue];
 
-					myWriter.write(month+i + "," + price + "," + name.substring(0, name.length()<50?name.length():50) + "," + issue + ",MOD" + System.lineSeparator());
-					myWriterMAR.write("," + month+i+ "," + code + "," + price + "," + name + "," + issue + System.lineSeparator());
+					myWriter.write("\""+month+i + "\",\"" + price + "\",\"" + name.substring(0, name.length()<50?name.length():50) + "\",\"" + issue + "\",\"MOD\"" + System.lineSeparator());
+					myWriterMAR.write(",\"" + month+i+ "\",\"'" + code + "\",\"" + price + "\",\"" + name + "\",\"" + issue + "\"" + System.lineSeparator());
 					myWriterMARMG.write(";" + month+i+ ";" + code + ";" + price + ";" + name + ";" + issue + System.lineSeparator());
 					i++;
 				}
@@ -190,10 +191,14 @@ public class Import {
 				myWriterMAR.close();
 				myWriterMARMG.close();
 				myReader.close();
-				
+
 				Convert.convertToXls("mar_mg.csv");
 				Convert.convertToXls("dc_mg.csv");
 				Convert.convertToDbf("import.csv");
+
+				Files.delete(Paths.get(pathDia));
+				Files.delete(Paths.get(pathDC));
+				Files.delete(Paths.get(pathMar));
 
 			} catch (Exception e) {
 				System.out.println("An error occurred.");
@@ -208,3 +213,4 @@ public class Import {
 
 
 }
+

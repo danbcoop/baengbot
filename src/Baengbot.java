@@ -34,17 +34,16 @@ public class Baengbot{
 
 	public boolean run() {
 		adjustCodes();
-
+System.out.println(pdfContent);
 		if (init()) {
 			System.out.println("Starte Eingabe.");
-
 			//Skip non-previews items
 			String startString = Config.begin();
 
 			pdfContent = pdfContent.substring(pdfContent.indexOf(startString));
 			//Creating a matcher object
 
-			String regex = "(DC|[A-Z]{3})[0-9DC]{6,8}";
+			String regex = "([A-Z]{2}|[A-Z]{3})[0-9A-Z]{6,8}";
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(pdfContent);
 
@@ -89,17 +88,17 @@ public class Baengbot{
 	}
 
 	private void adjustCodes() {
-		String repPattern = "(\\d{1})(\\d{3})(DC)(\\d+)";
+		String repPattern = "(\\d{1})(\\d{3})([A-Z]{2})(\\d+)";
 		pdfContent = pdfContent.replaceAll(repPattern, "$3$1$2$4");
 		pdfContent = pdfContent.replaceAll("UCS", "Z");
 		//Marvel Codes nach LUT ersetzen
-		repPattern = "([79]\\d{16})";	
-		String path = Paths.get("mar_mg.csv").toString();
+		repPattern = "([789]\\d{16})";	
+		String path = Paths.get("mar_mg").toString();
 		Pattern r = Pattern.compile(repPattern);
 		Matcher m = r.matcher(pdfContent);
 		while (m.find()) {
 			try {
-				System.out.println(m.group());
+				String code = m.group();
 				File myObj = new File(path);
 				Scanner myReader = new Scanner(myObj);
 				myReader.useDelimiter(System.lineSeparator());
@@ -109,8 +108,9 @@ public class Baengbot{
 					String line = myReader.nextLine();
 					String mg = line.replaceFirst(regex, "$1");
 					String mar = line.replaceFirst(regex,"$2");
-					if (m.group().equals(mar)) {
-						pdfContent.replaceFirst(repPattern, mg);
+					
+					if (code.equals(mar)) {
+						pdfContent=pdfContent.replaceFirst(code, mg);
 					}
 				}
 				myReader.close();
@@ -123,7 +123,7 @@ public class Baengbot{
 	}
 
 	public static void readPdf() {
-		File file = new File(".");
+		File file = new File(Config.pathIn());
 		String[] filenames = file.list();
 		String filename = "";
 		Scanner in = UI.in;
@@ -152,7 +152,7 @@ public class Baengbot{
 		BodyContentHandler handler = new BodyContentHandler();
 		try {
 			Metadata metadata = new Metadata();
-			FileInputStream inputstream = new FileInputStream(new File(filename));
+			FileInputStream inputstream = new FileInputStream(new File(Paths.get(Config.pathIn(),filename).toString()));
 			ParseContext pcontext = new ParseContext();
 			//parsing the document using PDF parser
 			PDFParser pdfparser = new PDFParser(); 
@@ -266,10 +266,13 @@ public class Baengbot{
 			Comic c = new Comic(name, issue, code);
 			cOld = cs.comics.put(name, c);
 			if (cOld!=null) {
-				if (c.getIssue()-cOld.getIssue()>1) 
+				if (cOld.getIssue()>c.getIssue()) {
+					cs.comics.put(name, cOld);
+			} else if (c.getIssue()-cOld.getIssue()>1) 
 					System.out.println("Warnung: " + cOld + "->" + c);
 			}
 		}
+		
 		regex = RegexHelper.rawComicVariant;
 		pattern = Pattern.compile(regex);
 		matcher = pattern.matcher(comics);
@@ -284,7 +287,9 @@ public class Baengbot{
 			Comic c = new Comic(name, Integer.parseInt(issue), code);
 			cOld = cs.comics.put(name, c);
 			if (cOld!=null) {
-				if (c.getIssue()-cOld.getIssue()>1) 
+				if (cOld.getIssue()>c.getIssue()) {
+					cs.comics.put(name, cOld);
+			} else if (c.getIssue()-cOld.getIssue()>1) 
 					System.out.println("Warnung: " + cOld + "->" + c);
 			}
 		}
@@ -292,6 +297,7 @@ public class Baengbot{
 	}
 
 }
+
 
 
 

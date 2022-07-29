@@ -31,12 +31,12 @@ public class Export {
 			
 			
 			while (myReaderOrderDat.hasNextLine()) {
-				String regex = ",([^,]+),([^,]+),([^,]+),.+$";
+				String regex = ",\"([^,]+)\",\"([^,]+)\",([^,]+),.+$";
 				String repCode = "(\\d+)(\\D\\D)(\\d+)";
 				String regExp = "([^;]+);([^;]+)";
 				String qty = "";
 				line = myReaderOrderDat.nextLine();
-				String code = line.replaceFirst(regex, "$1");
+				String code = line.replaceFirst(regex, "$2");
 				
 				Scanner myReaderExport = new Scanner(myObjExport);
 				myReaderExport.useDelimiter(System.lineSeparator());
@@ -51,7 +51,7 @@ public class Export {
 						found = true;
 					}
 				}
-				myWriter.write(qty + line+System.lineSeparator());
+				myWriter.write("\"" +qty+ "\"" + line+System.lineSeparator());
 				myReaderExport.close();
 				
 			}
@@ -71,7 +71,7 @@ public class Export {
 			myWriter.write(myReaderOrderDat.nextLine()+System.lineSeparator());
 			
 			while (myReaderOrderDat.hasNextLine()) {
-				String regex = ",([^,]+),([^,]+),([^,]+),.+$";
+				String regex = ",\"([^\"]+)\",\"([^\"]+)\",.+$";
 				String regExp = "([^;]+);([^;]+)";
 				String qty = "";
 				line = myReaderOrderDat.nextLine();
@@ -90,7 +90,7 @@ public class Export {
 						found = true;
 					}
 				}
-				myWriter.write(qty + line+System.lineSeparator());
+				myWriter.write("\""+qty +"\""+ line+System.lineSeparator());
 				myReaderExport.close();
 				
 			}
@@ -108,3 +108,4 @@ public class Export {
 
 	}
 }
+

@@ -15,3 +15,4 @@ public final class RegexHelper {
   static final String rawComicVariant = "\\d+\\s(\\w{6,11})\\s\\d+,\\d\\d\\s(.+)\\s#(\\d+)(\\.\\w+)";
 
 }
+
